@@ -2,7 +2,8 @@ let saldo = 5000;
 
 let activo = true;
 let historialTransacciones = [];
-// historialTransacciones.push(saldo);
+let firstTransf = "Se deposito $" + saldo;
+historialTransacciones.push(firstTransf);
 
 const iniciarSesion = () => {
   for (let i = 3; i > 0; i--) {
@@ -67,8 +68,10 @@ const depositarDinero = () => {
 
   if (dineroDepositado) {
     saldo = saldo + dineroDepositado;
-    depositoExitoso = "Se deposito $" + saldo;
+
+    depositoExitoso = "Se deposito $" + dineroDepositado;
     historialTransacciones.push(depositoExitoso);
+
     alert("Operacion realizada con exito!");
     return mostrarMenu();
   } else {
@@ -91,7 +94,7 @@ const retirarDinero = () => {
     return retirarDinero();
   } else {
     saldo = saldo - dineroRetirado;
-    retiroExitoso = "Se retiro $" + saldo;
+    retiroExitoso = "Se retiro $" + dineroRetirado;
     historialTransacciones.push(retiroExitoso);
     alert("Operacion realizada con exito!");
     return mostrarMenu();
