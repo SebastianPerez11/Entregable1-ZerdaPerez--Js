@@ -7,8 +7,38 @@
     <title>Simulador de Cajero de Banco</title>
   </head>
   <body>
-    <main>
-      <img class="bg_hero" src="assets/img/bg.jpg" alt="" />
+    <main class="container">
+      <section class="window">
+        <span id="userActive"></span>
+
+        <span id="outputData"></span>
+
+        <span id="alertModal"></span>
+
+        <form id="formLogin" action="">
+          <p class="contain_input">
+            <label class="title" for="">Ingresar Clave de Cuenta:</label>
+            <input class="inputClave" id="PIN" type="number" />
+          </p>
+
+          <input class="inputSubmit" value="Iniciar Sesion" type="submit" />
+
+          <div id="responseReturn"></div>
+        </form>
+
+        <div id="menu">
+          <button class="button" id="btnBalance">Consultar Saldo</button>
+          <button class="button" id="btnDeposit">Depositar Dinero</button>
+          <button class="button" id="btnRemove">Retirar Dinero</button>
+          <button class="button" id="btnHistory">Mostrar Movimientos</button>
+          <button class="button" id="btnSesion">Cerrar Sesion</button>
+          <img
+            class="button"
+            src="./assets/img/test.png"
+            alt="Imagen de prueba"
+          />
+        </div>
+      </section>
     </main>
   </body>
 </html>
