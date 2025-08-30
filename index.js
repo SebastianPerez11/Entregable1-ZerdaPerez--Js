@@ -1,3 +1,5 @@
+// Importar SweetAlert2 desde CDN (agregar esto al HTML: <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.all.min.js"></script>)
+
 const pin = document.querySelector("#PIN");
 const formLogin = document.querySelector("#formLogin");
 const responseReturn = document.querySelector("#responseReturn");
@@ -11,32 +13,36 @@ const alertModal = document.querySelector("#alertModal");
 btnSesion = document.querySelector("#btnSesion");
 
 let intentosRestantes = 3;
+let usuarios = []; // Inicializar como array vacío
 
-// Función para cargar usuarios desde localStorage
-const cargarUsuarios = () => {
-  const usuariosGuardados = localStorage.getItem("usuarios");
-  if (usuariosGuardados) {
-    return JSON.parse(usuariosGuardados);
-  } else {
-    // Si no hay usuarios guardados, usar los datos iniciales
-    return [
-      {
-        id: 0,
-        nombre: "Sebastian",
-        codigo: 777,
-        saldo: 5000,
-        historialTransacciones: ["Se deposito: $5000"],
-        sesion: false,
-      },
-      {
-        id: 1,
-        nombre: "Brian",
-        codigo: 77,
-        saldo: 15000,
-        historialTransacciones: ["Se deposito: $15000"],
-        sesion: false,
-      },
-    ];
+// Función para cargar usuarios desde data.json
+const cargarUsuarios = async () => {
+  try {
+    const response = await fetch('./data/data.json');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const usuariosDesdeJson = await response.json();
+    
+    // Verificar si hay usuarios en localStorage
+    const usuariosGuardados = localStorage.getItem("usuarios");
+    if (usuariosGuardados) {
+      return JSON.parse(usuariosGuardados);
+    } else {
+      // Si no hay usuarios en localStorage, usar los del JSON y guardarlos
+      localStorage.setItem("usuarios", JSON.stringify(usuariosDesdeJson));
+      return usuariosDesdeJson;
+    }
+  } catch (error) {
+    console.error('Error al cargar usuarios desde data.json:', error);
+    // Mostrar error con SweetAlert2
+    Swal.fire({
+      icon: 'error',
+      title: 'Error de carga',
+      text: 'No se pudo cargar el archivo data.json. Verifique que el archivo existe y el servidor está funcionando.',
+      confirmButtonColor: '#d33'
+    });
+    throw error;
   }
 };
 
@@ -45,8 +51,16 @@ const guardarUsuarios = (usuarios) => {
   localStorage.setItem("usuarios", JSON.stringify(usuarios));
 };
 
-// Cargar usuarios al iniciar
-let usuarios = cargarUsuarios();
+// Función para inicializar la aplicación
+const inicializarApp = async () => {
+  try {
+    usuarios = await cargarUsuarios();
+    iniciarSesion();
+  } catch (error) {
+    responseReturn.innerHTML = "❌ Error al cargar datos. Verifique que el archivo data.json existe.";
+    responseReturn.style.color = "red";
+  }
+};
 
 const verificarUsuario = (pinIngresado) => {
   const userActive = document.querySelector("#userActive");
@@ -58,7 +72,7 @@ const verificarUsuario = (pinIngresado) => {
   if (usuarioEncontrado) {
     responseReturn.innerHTML = "✅ Inicio de sesión exitoso";
     responseReturn.style.color = "green";
-    userActive.innerHTML = `👤 <h3> Bienvenido nuevamente: ${usuarioEncontrado.nombre} </h3>`;
+    userActive.innerHTML = ` <p> ${usuarioEncontrado.nombre[0]} </p>`;
     intentosRestantes = 3;
     pin.value = "";
     usuarioEncontrado.sesion = true;
@@ -108,8 +122,8 @@ const showBalance = (usuarioEncontrado) => {
 
 const depositMoney = (usuarioEncontrado) => {
   outputData.innerHTML = ` <form id="formDeposit" action=""> 
-                                <input type="number" name="" id="inputDeposit"> 
-                                <button>Confirmar Deposito</button> 
+                                <input class="inputAction" type="number" name="" id="inputDeposit" placeholder="Ingrese monto a depositar"> 
+                                <button class="inputSubmit">Confirmar Deposito</button> 
                                 </form>`;
 
   const formDeposit = document.querySelector("#formDeposit");
@@ -117,28 +131,35 @@ const depositMoney = (usuarioEncontrado) => {
   formDeposit.addEventListener("submit", (e) => {
     e.preventDefault();
     const inputParse = parseFloat(inputDeposit.value);
-    if (inputDeposit.value === "") {
-      alertModal.innerHTML = "<h4> ❌ No se ingreso ningun monto </h4>";
-      alertModal.style.display = "block";
-      alertModal.style.color = "red";
+    
+    if (inputDeposit.value === "" || isNaN(inputParse) || inputParse <= 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error en depósito',
+        text: 'Debe ingresar un monto válido mayor a 0',
+        confirmButtonColor: '#d33'
+      });
     } else {
       usuarioEncontrado.saldo += inputParse;
       inputDeposit.value = "";
-      alertModal.innerHTML = "<h4> ✔️ Operación realizada con exito! </h4>";
-      alertModal.style.display = "block";
-      alertModal.style.color = "green";
-      mensaje = `Se deposito:  $${inputParse}`;
+      Swal.fire({
+        icon: 'success',
+        title: '¡Depósito exitoso!',
+        text: `Se depositaron ${inputParse} correctamente`,
+        confirmButtonColor: '#28a745',
+        timer: 2000
+      });
+      mensaje = `Se deposito: ${inputParse}`;
       usuarioEncontrado.historialTransacciones.push(mensaje);
-      guardarUsuarios(usuarios); // Guardar cambios
+      guardarUsuarios(usuarios);
     }
-    setTimeout(deleteModal, 2000);
   });
 };
 
 const RemoveMoney = (usuarioEncontrado) => {
   outputData.innerHTML = ` <form id="formRemove" action=""> 
-                                <input type="number" name="" id="inputRemove"> 
-                                <button>Confirmar Retiro</button> 
+                                <input class="inputAction" type="number" name="" id="inputRemove" placeholder="Ingrese monto a retirar"> 
+                                <button class="inputSubmit">Confirmar Retiro</button> 
                                 </form>`;
 
   const formRemove = document.querySelector("#formRemove");
@@ -146,27 +167,35 @@ const RemoveMoney = (usuarioEncontrado) => {
   formRemove.addEventListener("submit", (e) => {
     e.preventDefault();
     const inputParse = parseFloat(inputRemove.value);
-    if (inputParse > usuarioEncontrado.saldo) {
-      alertModal.innerHTML =
-        "<h4> ❌ El monto ingresado excede al saldo actual </h4>";
-      alertModal.style.display = "block";
-      alertModal.style.color = "red";
-    } else if (inputRemove.value === "") {
-      alertModal.innerHTML = "<h4> ❌ No se ingreso ningun monto </h4>";
-      alertModal.style.display = "block";
-      alertModal.style.color = "red";
+    
+    if (inputRemove.value === "" || isNaN(inputParse) || inputParse <= 0) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error en retiro',
+        text: 'Debe ingresar un monto válido mayor a 0',
+        confirmButtonColor: '#d33'
+      });
+    } else if (inputParse > usuarioEncontrado.saldo) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Saldo insuficiente',
+        text: `El monto ingresado (${inputParse}) excede su saldo actual (${usuarioEncontrado.saldo})`,
+        confirmButtonColor: '#ffc107'
+      });
     } else {
-      alertModal.innerHTML = "<h4> ✔️ Operación realizada con exito! </h4>";
-      alertModal.style.display = "block";
-      alertModal.style.color = "green";
+      Swal.fire({
+        icon: 'success',
+        title: '¡Retiro exitoso!',
+        text: `Se retiraron ${inputParse} correctamente`,
+        confirmButtonColor: '#28a745',
+        timer: 2000
+      });
       usuarioEncontrado.saldo -= inputParse;
       inputRemove.value = "";
-      mensaje = `Se retiro:  $${inputParse}`;
+      mensaje = `Se retiro: ${inputParse}`;
       usuarioEncontrado.historialTransacciones.push(mensaje);
-      guardarUsuarios(usuarios); // Guardar cambios
+      guardarUsuarios(usuarios);
     }
-
-    setTimeout(deleteModal, 2000);
   });
 };
 
@@ -190,7 +219,7 @@ const limpiarResponsReturn = () => {
 const entrarAlSistema = (usuarioEncontrado) => {
   if (usuarioEncontrado.sesion) {
     formLogin.style.display = "none";
-    menu.style.display = "grid";
+    menu.style.display = "flex";
 
     btnBalance.addEventListener("click", () => {
       showBalance(usuarioEncontrado);
@@ -209,19 +238,39 @@ const entrarAlSistema = (usuarioEncontrado) => {
     });
 
     btnSesion.addEventListener("click", () => {
-      usuarioEncontrado.sesion = false;
-      console.log(usuarioEncontrado.sesion);
-      formLogin.style.display = "flex";
-      menu.style.display = "none";
-
-      userActive.innerHTML = ``;
-      responseReturn.innerHTML = "✅ Sesión cerrada con exito";
-      outputData.innerHTML = "";
-      guardarUsuarios(usuarios); // Guardar cambios
-
-      setTimeout(limpiarResponsReturn, 1000);
+      Swal.fire({
+        title: '¿Cerrar sesión?',
+        text: '¿Está seguro que desea cerrar su sesión?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Sí, cerrar sesión',
+        cancelButtonText: 'Cancelar'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          usuarioEncontrado.sesion = false;
+          formLogin.style.display = "flex";
+          menu.style.display = "none";
+          userActive.innerHTML = ``;
+          responseReturn.innerHTML = "✅ Sesión cerrada con éxito";
+          outputData.innerHTML = "";
+          guardarUsuarios(usuarios);
+          
+          Swal.fire({
+            icon: 'success',
+            title: 'Sesión cerrada',
+            text: 'Ha cerrado sesión correctamente',
+            timer: 1500,
+            showConfirmButton: false
+          });
+          
+          setTimeout(limpiarResponsReturn, 2000);
+        }
+      });
     });
   }
 };
 
-iniciarSesion();
+// Inicializar la aplicación cuando se carga la página
+inicializarApp();

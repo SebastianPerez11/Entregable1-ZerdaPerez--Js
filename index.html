@@ -1,45 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="index.css" />
-    <title>Simulador de Cajero de Banco</title>
-  </head>
-  <body>
-    <main class="container">
-      <section class="window">
-        <span id="userActive"></span>
 
-        <span id="outputData"></span>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="index.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.32/sweetalert2.all.min.js"></script>
+  <title>Simulador de Cajero de Banco</title>
+</head>
 
-        <span id="alertModal"></span>
+<body>
+  <main class="container">
+    <section class="window">
 
-        <form id="formLogin" action="">
-          <p class="contain_input">
-            <label class="title" for="">Ingresar Clave de Cuenta:</label>
-            <input class="inputClave" id="PIN" type="number" />
-          </p>
+      <form id="formLogin" action="">
+        <h1>Cajero Automatico</h1>
+        <p class="contain_input">
+          <label class="label_input" for="">Ingrese su PIN:</label>
+          <input class="inputClave" id="PIN" type="number" />
+        </p>
 
-          <input class="inputSubmit" value="Iniciar Sesion" type="submit" />
+        <input class="inputSubmit" value="Iniciar Sesion" type="submit" />
 
-          <div id="responseReturn"></div>
-        </form>
+        <div id="responseReturn"></div>
+      </form>
 
-        <div id="menu">
-          <button class="button" id="btnBalance">Consultar Saldo</button>
-          <button class="button" id="btnDeposit">Depositar Dinero</button>
-          <button class="button" id="btnRemove">Retirar Dinero</button>
-          <button class="button" id="btnHistory">Mostrar Movimientos</button>
-          <button class="button" id="btnSesion">Cerrar Sesion</button>
-          <img
-            class="button"
-            src="./assets/img/test.png"
-            alt="Imagen de prueba"
-          />
+
+
+      <section id="menu">
+        <div class="container_menu">
+          <header class="container_menu_header">
+            <h2>Cajero Automatico</h2>
+            <ul class="container_menu_header_actions">
+              <li>
+                <span id="userActive"></span>
+              </li>
+              <li>
+                <button class="btn_close" id="btnSesion"><img class="btn_close_icon" src="./assets/img/LogoutIcon.svg
+                  " alt=""></button>
+              </li>
+            </ul>
+          </header>
+
+          <div class="container_menu_btns">
+            <div class="buttons_actions">
+              <button class="button" id="btnBalance">Consultar Saldo</button>
+              <button class="button" id="btnDeposit">Depositar Dinero</button>
+              <button class="button" id="btnRemove">Retirar Dinero</button>
+              <button class="button" id="btnHistory">Mostrar Movimientos</button>
+            </div>
+            <div class="ouputs">
+              <span id="outputData"></span>
+              <span id="alertModal"></span>
+            </div>
+          </div>
+
         </div>
       </section>
-    </main>
-  </body>
+      </div>
+
+  </main>
+</body>
+
 </html>
 <script src="index.js"></script>

@@ -1,0 +1,18 @@
+[
+  {
+    "id": 0,
+    "nombre": "Sebastian",
+    "codigo": 777,
+    "saldo": 5000,
+    "historialTransacciones": ["Se deposito: $5000"],
+    "sesion": false
+  },
+  {
+    "id": 1,
+    "nombre": "Brian",
+    "codigo": 77,
+    "saldo": 15000,
+    "historialTransacciones": ["Se deposito: $15000"],
+    "sesion": false
+  }
+]
